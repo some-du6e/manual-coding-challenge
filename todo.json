@@ -1,8 +1,11 @@
 {
-  "buy groceries": true,
-  "im not sure": true,
+  "0": true,
+  "a": true,
+  "buy groceries": false,
+  "im not sure": false,
+  "sigma": true,
   "sigmaboy": true,
-  "super sigma boy": true,
+  "super sigma boy": false,
   "testingg": true,
   "tungtung": true
 }
