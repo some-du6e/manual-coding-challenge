@@ -5,19 +5,21 @@ global todolist
 global maxchoice
 todofilename = "todo.json"
 
-todolist = {
-        "tungtung": False,
-        "sigmaboy": True,
-        "im not sure": True,
-        "testingg": False,
-        "buy groceries": True
-}
+# todolist = {
+#         "tungtung": False,
+#         "sigmaboy": True,
+#         "im not sure": True,
+#         "testingg": False,
+#         "buy groceries": True
+# }
 
 
 # load todolist
 try:
     open(todofilename)
     print("todo exists")
+    with open(todofilename) as jsonn:
+        todolist = json.load(jsonn)
 except:
     print("todo doesnt exist... creating")
     with open(todofilename, "a") as smth:
@@ -31,11 +33,14 @@ maxchoice = len(todolist)
 
 def yabadadoo(key):
     global selectedone
-    
+    keys = list(todolist.keys())
+    selectedkey = keys[selectedone - 1]
     if key == "up arrow" and selectedone != 1:
         selectedone -= 1
     elif key == "down arrow" and selectedone != maxchoice:
         selectedone += 1
+    elif key == "space":
+        todolist[selectedkey] = not todolist[selectedkey]
 
     
     renderthing(selectedone)
@@ -43,8 +48,9 @@ def yabadadoo(key):
 
 
 
-
 def renderthing(selectedchoice):
+    # clear the console so its prettier
+    print("\033c\033[3J", end='')
     global name
     # i imagine it like
     # [ ] tungtung
@@ -72,6 +78,8 @@ def renderthing(selectedchoice):
 
         print("\r", end="")
         print(cross, name)
+
+    
         
 
 
@@ -128,7 +136,7 @@ try:
             if read in commands:
                 if commands[read] == " ":
                     commands[read] = "space"
-                println(commands[read])
+                # println(commands[read])
                 yabadadoo(str(commands[read]))
                 read = ''
                 break
@@ -137,12 +145,12 @@ try:
         for c in read:
             if c == " ":
                 c = "space"
-            println(c)
+            # println(c)
             yabadadoo(c)
 
 # if its a ctrl c then just say bye
 except KeyboardInterrupt:
-  println("bye ")
+  pass
 
 except Exception as e:
     termios.tcsetattr(fd, termios.TCSADRAIN, old_settings) 
@@ -155,5 +163,7 @@ except Exception as e:
 # Always clean up
 finally:
     termios.tcsetattr(fd, termios.TCSADRAIN, old_settings) 
-    println('bye')
+    with open(todofilename, "w") as f:
+        prettydump = json.dumps(todolist,sort_keys=True,indent=2)
+        f.write(prettydump)
     sys.exit(0)
