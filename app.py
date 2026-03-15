@@ -1,4 +1,5 @@
-
+DEBUGGING = True
+extrastufffordebuggingnotthatnagging = True
 import sys,tty,termios
 import json
 global todolist
@@ -31,38 +32,128 @@ except:
 selectedone = 1
 maxchoice = len(todolist)
 addchoice = maxchoice  + 1
+wipechoice = maxchoice  + 2
+firstbutton = addchoice # CHANGE THIS WHEN U ADD A NEW BUTTON
+frlastchoice = wipechoice # CHANGE THIS WHEN U ADD A NEW BUTTON
 onaddchoice = False
+onwipechoice = False
+on_a_button = onaddchoice or onwipechoice # CHANGE THIS WHEN U ADD A NEW BUTTON
+
+def updatevars(todolist):
+    selectedone = 1
+    maxchoice = len(todolist)
+    addchoice = maxchoice  + 1
+    wipechoice = maxchoice  + 2
+    firstbutton = addchoice # CHANGE THIS WHEN U ADD A NEW BUTTON
+    frlastchoice = wipechoice # CHANGE THIS WHEN U ADD A NEW BUTTON
+    onaddchoice = False
+    onwipechoice = False
+    on_a_button = onaddchoice or onwipechoice # CHANGE THIS WHEN U ADD A NEW BUTTON
+
 
 def yabadadoo(key):
-    global selectedone, maxchoice, addchoice, onaddchoice
+    # update stuff
+    global selectedone, maxchoice, addchoice, onaddchoice, onwipechoice, wipechoice, selectedkey
+    # selectedone = 1
+    maxchoice = len(todolist)
+    addchoice = maxchoice  + 1
+    wipechoice = maxchoice + 2
+    onaddchoice = False
+    onwipechoice = False
+    if selectedone == firstbutton:
+        on_a_button = True
     keys = list(todolist.keys())
     # sorry for being messy
-    if int(selectedone)  == int(addchoice):
+    if int(selectedone) == int(addchoice):
         onaddchoice = True
+    elif int(selectedone) == int(wipechoice):
+        onwipechoice = True
+        onaddchoice = False
     else:
-        onaddchoice = False
-        selectedkey = keys[selectedone - 1]
+        on_a_button = False
+        selectedkey = keys[selectedone - 1] # this function is worse than
     if key == "up arrow" and selectedone != 1:
-        onaddchoice = False
+        if onaddchoice == True:
+            onaddchoice = False
+        elif onwipechoice == True:
+            onwipechoice = False
         selectedone -= 1
-    elif key == "down arrow" and selectedone != addchoice:
+    elif key == "down arrow" and selectedone != frlastchoice:
+        if selectedone == wipechoice:
+            onwipechoice == False
         selectedone += 1
-    elif key == "space" and selectedone != addchoice: # for any other task
-        todolist[selectedkey] = not todolist[selectedkey]
-    elif key == "space" and selectedone == addchoice:
-        # clear the console so its prettier
-        print("\033c\033[3J", end='')
-        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings) 
-        sigmaboy = input("Add task: ")
-        todolist[sigmaboy] = False
-        tty.setraw(sys.stdin.fileno())
-        # check all this bs
-        
-        selectedone = 1
-        maxchoice = len(todolist)
-        addchoice = maxchoice  + 1
-        onaddchoice = False
+    elif key == "space": # for any other task
+        if selectedone != wipechoice and selectedone != addchoice:
+            todolist[selectedkey] = not todolist[selectedkey]
 
+        if selectedone == addchoice:
+            if not DEBUGGING == True:
+                print("\033c\033[3J", end='') 
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings) 
+            sigmaboy = input("Add task: ")
+            todolist[sigmaboy] = False
+            tty.setraw(sys.stdin.fileno())  
+            # check all this bs
+        
+            updatevars(todolist)
+
+        if selectedone == wipechoice:
+            if not DEBUGGING == True:
+                print("\033c\033[3J", end='')
+            print("\r", end="")
+            print("Removing done tasks...")
+            toberemoved = []
+            # make a list of all the stuff thats gonna get removed
+            for i in todolist:
+                if DEBUGGING == True: 
+                    print("\r", end="")
+                    print("checking ", i)
+                if todolist[i] == True:
+                    toberemoved.append(i)
+            print("\r", end="")
+            print("Done")
+            # inflate wakatime hours by adding PURE bs
+            word = "these"
+            if len(toberemoved) == 1:
+                word = "this one"
+            
+            # ask the user if its OK to remove allat and also list it
+            print("\r", end="")
+            print("Are you sure you want to remove", word, "?")
+            for i in toberemoved:
+                print("\r", end="")
+                print(i)
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings) 
+            sigmaboy = input("Okay to remove? (y/N): ")
+            # check for edge cases
+            if sigmaboy == "" or not sigmaboy:
+                ok_to_remove = False
+
+            # more useless bs no one is gonna use
+            ok_to_remove = None
+            if sigmaboy == "yes" or sigmaboy == "y" or sigmaboy == "yh" or sigmaboy == "yeah" and ok_to_remove == None:
+                ok_to_remove = True
+            elif sigmaboy == "no" or sigmaboy == "n" or sigmaboy == "nah" and ok_to_remove:
+                ok_to_remove = False
+            else:
+                print('not cool man')
+            tty.setraw(sys.stdin.fileno())  
+            # slime that boy out
+            if ok_to_remove == True:
+                for i in toberemoved:
+                    todolist.pop(i)
+
+            # update vars
+            updatevars(todolist)
+            
+
+    
+    if selectedone == addchoice:
+        on_a_button = True
+        onaddchoice = True
+    elif selectedone == wipechoice:
+        on_a_button = True
+        onwipechoice = True
     
     renderthing(selectedone)
 
@@ -71,20 +162,35 @@ def yabadadoo(key):
 
 def renderthing(selectedchoice):
     # clear the console so its prettier
-    print("\033c\033[3J", end='')
+    if not DEBUGGING == True:
+        print("\033c\033[3J", end='')
+    
     global name
     global addchoice
-    global onaddchoice
+    global on_a_button, onaddchoice, onwipechoice
+    on_a_button = False
+    onaddchoice = False   # reset both here
+    onwipechoice = False  # reset both here
+
     # i imagine it like
     # [ ] tungtung
     # [X] sigmaboy
-    if int(selectedone)  == int(addchoice):
+    if int(selectedone)  == int(wipechoice):
+        if DEBUGGING: print("called")
+        onwipechoice = True
+    elif int(selectedone) == int(addchoice):
         onaddchoice = True
+
     keys = list(todolist.keys())
-    if selectedone == addchoice:
-        selectedkey = "SIGMAA"
+    if onaddchoice == True or onwipechoice == True:
+        selectedkey = ""
     else:
+        if DEBUGGING: print("called the fuckass thing at 110")
+        if DEBUGGING: print("on_buton = ", on_a_button)
+        if DEBUGGING: print("selected one: ", selectedone)
+
         selectedkey = keys[selectedone - 1]
+
     for i in todolist:
         
         # add the [X] thing
@@ -106,13 +212,42 @@ def renderthing(selectedchoice):
         print("\r", end="")
         print(cross, name)
 
-    # add choice
+    # add a new task
     text = "+ Add a new task"
     print("\r", end="")
     if onaddchoice:
         print('\033[1m' + text + '\033[0m') # bold that
     else:
         print(text)
+
+    # add the wipe thing
+    text = "> Remove all done tasks"
+    print("\r", end="")
+    if onwipechoice:
+        print('\033[1m' + text + '\033[0m') # bold that
+    else:
+        print(text)
+
+    if DEBUGGING == True or extrastufffordebuggingnotthatnagging == True:
+        print("\r", end="")
+        print("on_a_button = ", on_a_button)
+        print("\r", end="")
+        print("onwipechoice= ", onwipechoice)
+        print("\r", end="")
+        print("onaddchoice= ", onaddchoice)
+        print("\r", end="")
+        print("selectedone= ", selectedone)
+        print("\r", end="")
+        print("selectedchoice= ", selectedchoice)
+        print("\r", end="")
+        print("wipechoice= ", wipechoice)
+        print("\r", end="")
+        print("firstbutton= ", firstbutton)
+        print("\r", end="")
+        print("maxchoice= ", maxchoice)
+        print("\r", end="")
+        print("frlastchoice= ", frlastchoice)
+        
 
 
 
@@ -187,12 +322,27 @@ try:
 # if its a ctrl c then just say bye
 except KeyboardInterrupt:
     # clear the console so its prettier
-    print("\033c\033[3J", end='')
+    if not DEBUGGING == True:
+        print("\033c\033[3J", end='')
 
 except Exception as e:
     termios.tcsetattr(fd, termios.TCSADRAIN, old_settings) 
     import traceback
-    print("\nCrash:", flush=True)
+    print("info:")
+    if DEBUGGING == True:
+        print("\r", end="")
+        print("on_a_button = ", on_a_button)
+        print("\r", end="")
+        print("onwipechoice= ", onwipechoice)
+        print("\r", end="")
+        print("onaddchoice= ", onaddchoice)
+        print("\r", end="")
+        print("selectedone= ", selectedone)
+        print("\r", end="")
+        print("wipechoice= ", wipechoice)
+        print("\r", end="")
+        print("firstbutton= ", firstbutton)
+    print("\nCrash:")
     traceback.print_exc()
     sys.exit(1)
 

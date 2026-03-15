@@ -1,11 +1,6 @@
 {
-  "0": true,
-  "a": true,
-  "buy groceries": false,
-  "im not sure": false,
-  "sigma": true,
-  "sigmaboy": true,
-  "super sigma boy": false,
-  "testingg": true,
-  "tungtung": true
+  "Task1": false,
+  "Task2": false,
+  "Task3": false,
+  "Task4": false
 }
