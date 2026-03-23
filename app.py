@@ -1,6 +1,11 @@
-DEBUGGING = True
-extrastufffordebuggingnotthatnagging = True
-import sys,tty,termios
+DEBUGGING = False
+extrastufffordebuggingnotthatnagging = False
+try:
+    import sys,tty,termios
+except:
+    print("sorry u gotta use linux or wsl or mac for this")
+    exit(1)
+
 import json
 global todolist
 global maxchoice
@@ -40,15 +45,16 @@ onwipechoice = False
 on_a_button = onaddchoice or onwipechoice # CHANGE THIS WHEN U ADD A NEW BUTTON
 
 def updatevars(todolist):
-    selectedone = 1
+    global selectedone, maxchoice, addchoice, wipechoice, firstbutton, frlastchoice, onaddchoice, onwipechoice, on_a_button
     maxchoice = len(todolist)
-    addchoice = maxchoice  + 1
-    wipechoice = maxchoice  + 2
-    firstbutton = addchoice # CHANGE THIS WHEN U ADD A NEW BUTTON
-    frlastchoice = wipechoice # CHANGE THIS WHEN U ADD A NEW BUTTON
+    addchoice = maxchoice + 1
+    wipechoice = maxchoice + 2
+    firstbutton = addchoice
+    frlastchoice = wipechoice
     onaddchoice = False
     onwipechoice = False
-    on_a_button = onaddchoice or onwipechoice # CHANGE THIS WHEN U ADD A NEW BUTTON
+    on_a_button = False
+    selectedone = maxchoice  # land cursor on the new task
 
 
 def yabadadoo(key):
@@ -80,7 +86,7 @@ def yabadadoo(key):
         selectedone -= 1
     elif key == "down arrow" and selectedone != frlastchoice:
         if selectedone == wipechoice:
-            onwipechoice == False
+            onwipechoice = False
         selectedone += 1
     elif key == "space": # for any other task
         if selectedone != wipechoice and selectedone != addchoice:
@@ -111,7 +117,6 @@ def yabadadoo(key):
                 if todolist[i] == True:
                     toberemoved.append(i)
             print("\r", end="")
-            print("Done")
             # inflate wakatime hours by adding PURE bs
             word = "these"
             if len(toberemoved) == 1:
@@ -119,24 +124,25 @@ def yabadadoo(key):
             
             # ask the user if its OK to remove allat and also list it
             print("\r", end="")
-            print("Are you sure you want to remove", word, "?")
+            print("Are you sure you want to remove", word+ "?")
             for i in toberemoved:
                 print("\r", end="")
                 print(i)
             termios.tcsetattr(fd, termios.TCSADRAIN, old_settings) 
+            print("\r", end="")
             sigmaboy = input("Okay to remove? (y/N): ")
-            # check for edge cases
-            if sigmaboy == "" or not sigmaboy:
-                ok_to_remove = False
-
-            # more useless bs no one is gonna use
+            
             ok_to_remove = None
+            # more useless bs no one is gonna use
+
             if sigmaboy == "yes" or sigmaboy == "y" or sigmaboy == "yh" or sigmaboy == "yeah" and ok_to_remove == None:
                 ok_to_remove = True
             elif sigmaboy == "no" or sigmaboy == "n" or sigmaboy == "nah" and ok_to_remove:
                 ok_to_remove = False
-            else:
-                print('not cool man')
+            # check for edge cases
+            elif sigmaboy == "" or not sigmaboy:
+                ok_to_remove = False
+
             tty.setraw(sys.stdin.fileno())  
             # slime that boy out
             if ok_to_remove == True:
@@ -205,7 +211,7 @@ def renderthing(selectedchoice):
         name = i
         selectedchoice = int(selectedchoice)
         if selectedkey == name:
-            name = '\033[1m' + name + '\033[0m'
+            name = '\033[1m' + name + '\033[0m' + " <"
 
         
 
@@ -216,7 +222,7 @@ def renderthing(selectedchoice):
     text = "+ Add a new task"
     print("\r", end="")
     if onaddchoice:
-        print('\033[1m' + text + '\033[0m') # bold that
+        print('\033[1m' + text + '\033[0m'  + " <")  # bold that
     else:
         print(text)
 
@@ -224,7 +230,7 @@ def renderthing(selectedchoice):
     text = "> Remove all done tasks"
     print("\r", end="")
     if onwipechoice:
-        print('\033[1m' + text + '\033[0m') # bold that
+        print('\033[1m' + text + '\033[0m'  + " <")  # bold that
     else:
         print(text)
 
