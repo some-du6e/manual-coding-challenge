@@ -1,3 +1,10 @@
+# Todo cli
+A overcomplicated todo list cli made because my coding skills were rusting because of ai, made with minimal support from ai (only 3 claude debug chats and no google ai overview). The reason why its so complicated is because i decided to make it interactable with the arrow keys.
+
+## Tiny problems
+Dont try to have 0 tasks and try to add another one 
+
+## ai usage
 idea V
 ![cluade](image.png)
 
