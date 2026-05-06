@@ -5,9 +5,22 @@ A overcomplicated todo list cli made because my coding skills were rusting becau
 ### Requirements
 - UNIX computer
 - Python
-### Running
+### Installing from pip
+1. Install
 ```bash
-python  app.py
+pip install todo-cli-karim
+```
+2. Run
+```bash
+todocli
+```
+Or run
+```bash
+python -m todocli
+```
+### Running locally
+```bash
+python app.py
 ```
 
 ## Tiny problems
