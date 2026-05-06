@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "todo-cli-karim"
+version = "0.1.3"
+authors = [
+  { name="Karim Eltaib", email="me@karimeltaib.com" },
+]
+description = "An interactive todo list CLI with arrow key navigation"
+readme = "readme.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+license = "Unlicense"
+license-files = ["LICENSE*"]
+
+[project.urls]
+Homepage = "https://github.com/some-du6e/manual-coding-challenge"
+Issues = "https://github.com/some-du6e/manual-coding-challenge/issues"
+
+[project.scripts]
+todocli = "todocli:main"

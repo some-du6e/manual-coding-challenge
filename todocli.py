@@ -295,68 +295,73 @@ def getch():
 def println(*args):
     print(*args,end='\r\n',flush=True)
 
-renderthing(0)
+def main():
+    renderthing(0)
 
-# Preserve current terminal settings (we will restore these before exiting)
-fd = sys.stdin.fileno()
-old_settings = termios.tcgetattr(fd)
+    # Preserve current terminal settings (we will restore these before exiting)
+    fd = sys.stdin.fileno()
+    old_settings = termios.tcgetattr(fd)
 
-try:
-    # Enter raw mode (key events sent directly as characters)
-    tty.setraw(sys.stdin.fileno())
+    try:
+        # Enter raw mode (key events sent directly as characters)
+        tty.setraw(sys.stdin.fileno())
 
-    # Loop, waiting for keyboard input
-    while 1:
-        # Parse known command escape sequences
-        read = getch()
-        while any(k.startswith(read) for k in commands.keys()): 
-            if read in commands:
-                if commands[read] == " ":
-                    commands[read] = "space"
-                # println(commands[read])
-                yabadadoo(str(commands[read]))
-                read = ''
-                break
-            read += getch()
-        # Interpret all other inputs as text input
-        for c in read:
-            if c == " ":
-                c = "space"
-            # println(c)
-            yabadadoo(c)
+        # Loop, waiting for keyboard input
+        while 1:
+            # Parse known command escape sequences
+            read = getch()
+            while any(k.startswith(read) for k in commands.keys()): 
+                if read in commands:
+                    if commands[read] == " ":
+                        commands[read] = "space"
+                    # println(commands[read])
+                    yabadadoo(str(commands[read]))
+                    read = ''
+                    break
+                read += getch()
+            # Interpret all other inputs as text input
+            for c in read:
+                if c == " ":
+                    c = "space"
+                # println(c)
+                yabadadoo(c)
 
-# if its a ctrl c then just say bye
-except KeyboardInterrupt:
-    # clear the console so its prettier
-    if not DEBUGGING == True:
-        print("\033c\033[3J", end='')
+    # if its a ctrl c then just say bye
+    except KeyboardInterrupt:
+        # clear the console so its prettier
+        if not DEBUGGING == True:
+            print("\033c\033[3J", end='')
 
-except Exception as e:
-    termios.tcsetattr(fd, termios.TCSADRAIN, old_settings) 
-    import traceback
-    print("info:")
-    if DEBUGGING == True:
-        print("\r", end="")
-        print("on_a_button = ", on_a_button)
-        print("\r", end="")
-        print("onwipechoice= ", onwipechoice)
-        print("\r", end="")
-        print("onaddchoice= ", onaddchoice)
-        print("\r", end="")
-        print("selectedone= ", selectedone)
-        print("\r", end="")
-        print("wipechoice= ", wipechoice)
-        print("\r", end="")
-        print("firstbutton= ", firstbutton)
-    print("\nCrash:")
-    traceback.print_exc()
-    sys.exit(1)
+    except Exception as e:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings) 
+        import traceback
+        print("info:")
+        if DEBUGGING == True:
+            print("\r", end="")
+            print("on_a_button = ", on_a_button)
+            print("\r", end="")
+            print("onwipechoice= ", onwipechoice)
+            print("\r", end="")
+            print("onaddchoice= ", onaddchoice)
+            print("\r", end="")
+            print("selectedone= ", selectedone)
+            print("\r", end="")
+            print("wipechoice= ", wipechoice)
+            print("\r", end="")
+            print("firstbutton= ", firstbutton)
+        print("\nCrash:")
+        traceback.print_exc()
+        sys.exit(1)
 
 
-# Always clean up
-finally:
-    termios.tcsetattr(fd, termios.TCSADRAIN, old_settings) 
-    with open(todofilename, "w") as f:
-        prettydump = json.dumps(todolist,sort_keys=True,indent=2)
-        f.write(prettydump)
-    sys.exit(0)
+    # Always clean up
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings) 
+        with open(todofilename, "w") as f:
+            prettydump = json.dumps(todolist,sort_keys=True,indent=2)
+            f.write(prettydump)
+        sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()
